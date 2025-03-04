@@ -1,0 +1,21 @@
+{
+    "name": "pyrite357/laravel-bake",
+    "description": "A Laravel command similar to the bake command in CakePHP to build CRUD pages given a database table",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Pyrite357\\LaravelBake\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Brandon Tanner",
+            "email": "brandon.tanner@radeuslabs.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/console": "^11.0",
+        "illuminate/support": "^11.0"
+    }
+}
