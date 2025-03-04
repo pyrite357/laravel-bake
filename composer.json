@@ -2,6 +2,8 @@
     "name": "pyrite357/laravel-bake",
     "description": "A Laravel command similar to the bake command in CakePHP to build CRUD pages given a database table",
     "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Pyrite357\\LaravelBake\\": "src/"
