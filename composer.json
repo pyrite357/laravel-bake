@@ -13,9 +13,16 @@
             "email": "brandon.tanner@radeuslabs.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/pyrite357/laravel-bake.git"
+        }
+    ],
     "require": {
         "php": "^8.1",
         "illuminate/console": "^11.0",
-        "illuminate/support": "^11.0"
+        "illuminate/support": "^11.0",
+        "pyrite357/laravel-bake": "dev-main"
     }
 }
