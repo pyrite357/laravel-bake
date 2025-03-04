@@ -22,7 +22,6 @@
     "require": {
         "php": "^8.1",
         "illuminate/console": "^11.0",
-        "illuminate/support": "^11.0",
-        "pyrite357/laravel-bake": "dev-main"
+        "illuminate/support": "^11.0"
     }
 }
