@@ -2,8 +2,8 @@
 @section('content')
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1>Canned Reports</h1>
-            <a href="{{ route('canned-reports.create') }}" class="btn btn-primary">New Canned Report</a>
+            <h1>{{ modelPlural }}</h1>
+            <a href="{{ route('canned-reports.create') }}" class="btn btn-primary">New {{ modelSingular }}</a>
         </div>
 
         <table class="table table-bordered table-striped">
@@ -17,26 +17,26 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($reports as $report)
+                @foreach ($items as $item)
                     <tr>
-                        <td>{{ $report->id }}</td>
-                        <td>{{ $report->name }}</td>
-                        <td>{{ \Carbon\Carbon::parse($report->updated_at)->format('n/j/y, g:i A') }}</td>
-                        <td>{{ $report->updatedBy->name ?? 'Unknown' }}</td>
+                        <td>{{ $item->id }}</td>
+                        <td>{{ $item->name }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->updated_at)->format('n/j/y, g:i A') }}</td>
+                        <td>{{ $item->updatedBy->name ?? 'Unknown' }}</td>
                         <td>
-                            <a href="{{ route('canned-reports.show', $report) }}" class="btn btn-sm btn-info">View</a>
-                            <a href="{{ route('canned-reports.edit', $report) }}" class="btn btn-sm btn-warning">Edit</a>
-                            <form action="{{ route('canned-reports.destroy', $report) }}" method="POST" style="display:inline">
+                            <a href="{{ route('canned-reports.show', $item) }}" class="btn btn-sm btn-info">View</a>
+                            <a href="{{ route('canned-reports.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
+                            <form action="{{ route('canned-reports.destroy', $item) }}" method="POST" style="display:inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                             </form>
-                            <a href="{{ url('example.com/'.$report->id) }}" class="btn btn-sm btn-info">Launch</a>
+                            <a href="{{ url('example.com/'.$item->id) }}" class="btn btn-sm btn-info">Launch</a>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-        {{ $reports->appends(request()->query())->links() }}
+        {{ $items->appends(request()->query())->links() }}
     </div>
 @endsection

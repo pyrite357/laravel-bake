@@ -1,0 +1,28 @@
+@extends('layouts.bootstrap-table')
+@section('content')
+<div class="container mt-4">
+    <h2>{{ $cannedReport->name }}</h2>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Grid Title:</strong> {{ $cannedReport->grid_title }}</p>
+            <p><strong>Description:</strong> {{ $cannedReport->description }}</p>
+            <div class="mb-3">
+                <strong>SQL Query:</strong>
+                <pre class="bg-light p-3 border rounded">{{ $cannedReport->sql_query }}</pre>
+            </div>
+            <p><strong>Created:</strong> {{ \Carbon\Carbon::parse($cannedReport->created_at)->format('n/j/y, g:i A') }}</p>
+            <p><strong>Created By:</strong> {{ $cannedReport->createdBy->name ?? 'Unknown' }}</p>
+            <p><strong>Updated:</strong> {{ \Carbon\Carbon::parse($cannedReport->updated_at)->format('n/j/y, g:i A') }}</p>
+            <p><strong>Updated By:</strong> {{ $cannedReport->updatedBy->name ?? 'Unknown' }}</p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <a href="{{ route('canned-reports.edit', $cannedReport->id) }}" class="btn btn-warning">Edit</a>
+            <form method="POST" action="{{ route('canned-reports.destroy', $cannedReport->id) }}">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this report?')">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection

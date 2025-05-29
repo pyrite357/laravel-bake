@@ -1,0 +1,15 @@
+@extends('layouts.crud')
+@section('content')
+<div class="container mt-4">
+    <h2>Create Canned Report</h2>
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ route('canned-reports.store') }}">
+                @csrf
+                @include('canned_reports.form')
+                <button type="submit" class="btn btn-success mt-3">Create Report</button>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection

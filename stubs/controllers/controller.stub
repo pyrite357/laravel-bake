@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\{{ modelClass }};
+use Illuminate\Http\Request;
+
+class {{ controllerClass }} extends Controller {
+
+    public function index(Request $request) {
+        $sort = $request->get('sort', 'id');
+        $direction = $request->get('direction', 'desc');
+        $items = {{ modelClass }}::orderBy($sort, $direction)->paginate(20);
+        return view('{{ viewFolder }}.index', compact('items', 'sort', 'direction'));
+    }
+
+    public function create() {
+        return view('{{ viewFolder }}.create');
+    }
+
+    public function store(Request $request)
+    {
+        {{ modelClass }}::create($request->all());
+        return redirect()->route('{{ routePrefix }}.index');
+    }
+
+    public function edit({{ modelClass }} ${{ modelVariable }})
+    {
+        return view('{{ viewFolder }}.edit', compact('{{ modelVariable }}'));
+    }
+
+    public function update(Request $request, {{ modelClass }} ${{ modelVariable }})
+    {
+        ${{ modelVariable }}->update($request->all());
+        return redirect()->route('{{ routePrefix }}.index');
+    }
+
+    public function destroy({{ modelClass }} ${{ modelVariable }})
+    {
+        ${{ modelVariable }}->delete();
+        return redirect()->route('{{ routePrefix }}.index');
+    }
+}
+
