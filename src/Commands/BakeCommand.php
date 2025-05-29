@@ -45,13 +45,16 @@ class BakeCommand extends Command {
         $modelName = $name;
         $replacements = [
             '{{ modelSingular }}' => $modelName,                                // e.g., 'Post'
+            '{{ modelClass }}' => $modelName,                                // e.g., 'Post'
             '{{ modelPlural }}' => Str::plural($modelName),                    // 'Posts'
             '{{ modelVariable }}' => Str::camel($modelName),                   // 'post'
             '{{ modelVariablePlural }}' => Str::camel(Str::plural($modelName)),// 'posts'
             '{{ table }}' => Str::snake(Str::plural($modelName)),              // 'posts'
             '{{ routeName }}' => Str::snake(Str::plural($modelName)),          // 'posts'
+            '{{ routePrefix }}' => Str::snake(Str::plural($modelName)),          // 'posts'
             '{{ viewFolder }}' => Str::snake(Str::plural($modelName)),         // 'posts'
             '{{ title }}' => Str::headline(Str::plural($modelName)),           // 'Posts'
+            '{{ controllerClass }}' => $modelName.'Controller',                // 'PostsController'
         ];
         $tableName = Str::snake($table); // snake_case for URLs
         $this->info("Generating CRUD for: $name");
@@ -78,35 +81,33 @@ class BakeCommand extends Command {
         $this->info("\nModel created: app/Models/$name.php\n");
 
         // 2. Create Controller
-        $this->call('make:controller', [
-            'name' => "{$name}Controller",
-            '--resource' => true,
-            '--model' => $name, // binds the model
-        ]);
+        $stub_controller = file_get_contents(base_path('vendor/pyrite357/laravel-bake/stubs/controllers/controller.stub'));
+        $code_controller = $this->renderStub(base_path('vendor/pyrite357/laravel-bake/stubs/controllers/controller.stub'), $replacements);
+        $target_controller = app_path('Http/Controllers/'.$name.'Controller.php');
+        file_put_contents($target_controller, $code_controller);
+        $this->info("Controller created: $target_controller");
 
         // 3. Append route to routes/web.php
         $route = "\n// [Auto-Generated CRUD for $name]\n";
         $route .= "Route::resource('$table', App\\Http\\Controllers\\{$name}Controller::class);\n";
         file_put_contents(base_path('routes/web.php'), $route, FILE_APPEND);
 
-        // Generate Model
-        //$this->call('make:model', ['name' => $name, '--migration' => false, '--factory' => false]);
 
-        // Generate Controller
-        //$this->call('make:controller', ['name'=>"{$name}Controller"]);
-        //$this->info("Controller created: app/Http/Controllers/{$name}Controller.php");
-
-        $stubPath = __DIR__ . '/../stubs/form.stub.blade.php';
-        $this->info("stubPath is $stubPath");
-
-        // Generate Views
-        $viewPath = resource_path("views/{$tableName}/form.blade.php");
-        if (!file_exists(dirname($viewPath))) {
-            mkdir(dirname($viewPath), 0755, true);
+        // 4. Generate Views
+        $stubPath = __DIR__ . '/../../stubs/views/';
+        $viewPath = resource_path("views/{$tableName}/");
+        if (!file_exists($viewPath)) {
+            mkdir($viewPath, 0755, true);
         }
-        $formView = $this->renderStub($stubPath, $replacements);
-        file_put_contents($viewPath, $formView);
-        $this->info("View created: resources/views/{$tableName}/form.blade.php");
+        $views = ['index','create','edit','show','form'];
+        foreach ($views AS $view) {
+            $viewContent = $this->renderStub("{$stubPath}{$view}.stub", $replacements);
+            file_put_contents("{$viewPath}{$view}.blade.php", $viewContent);
+            $this->info("View created: resources/views/{$tableName}/{$view}.blade.php");
+        }
+        //$formView = $this->renderStub($stubPath.'form.stub', $replacements);
+        //file_put_contents($viewPath.'form.blade.php', $formView);
+        //$this->info("View created: resources/views/{$tableName}/form.blade.php");
 
         // Define Routes
         /*
