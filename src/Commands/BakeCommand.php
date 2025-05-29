@@ -12,6 +12,12 @@ class BakeCommand extends Command {
     protected $signature = 'cake:bake {table_name}';
     protected $description = 'Bake a new model (+CRUD pages) with Laravel-Bake by Pyrite357';
 
+    protected function renderStub(string $stubPath, array $vars): string {
+        $content = file_get_contents($stubPath);
+        return str_replace(array_keys($vars), array_values($vars), $content);
+    }
+
+
     public function handle() {
 
         // Ensure first argument is schema_name.table_name
@@ -66,9 +72,10 @@ class BakeCommand extends Command {
         // 1. Create Model with migration and factory
         $this->call('make:model', [
             'name' => $name,
-            '--migration' => true,
-            '--factory' => true,
+            '--migration' => false,
+            '--factory' => false,
         ]);
+        $this->info("\nModel created: app/Models/$name.php\n");
 
         // 2. Create Controller
         $this->call('make:controller', [
@@ -84,19 +91,22 @@ class BakeCommand extends Command {
 
         // Generate Model
         //$this->call('make:model', ['name' => $name, '--migration' => false, '--factory' => false]);
-        //$this->info("Model created: app/Models/$name.php");
 
         // Generate Controller
         //$this->call('make:controller', ['name'=>"{$name}Controller"]);
         //$this->info("Controller created: app/Http/Controllers/{$name}Controller.php");
 
-        // Generate View
-        $viewPath = resource_path("views/{$tableName}/index.blade.php");
+        $stubPath = __DIR__ . '/../stubs/form.stub.blade.php';
+        $this->info("stubPath is $stubPath");
+
+        // Generate Views
+        $viewPath = resource_path("views/{$tableName}/form.blade.php");
         if (!file_exists(dirname($viewPath))) {
             mkdir(dirname($viewPath), 0755, true);
         }
-        file_put_contents($viewPath, "@extends('layouts.crud')\n@section('content')\n<div id=\"extjs-app\"></div>\n<script src=\"/js/{$tableName}.js\"></script>\n@endsection");
-        $this->info("View created: resources/views/{$tableName}/index.blade.php");
+        $formView = $this->renderStub($stubPath, $replacements);
+        file_put_contents($viewPath, $formView);
+        $this->info("View created: resources/views/{$tableName}/form.blade.php");
 
         // Define Routes
         /*
