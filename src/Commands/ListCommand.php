@@ -13,9 +13,16 @@ class ListCommand extends Command {
     protected $description = 'List all tables in all schemas in the database';
 
     public function handle() {
-
-        $tables = DB::selectAll('SELECT schema, table FROM information_schema.tables');
-        print_r($tables);
+        $dbname = config('database.connections.' . config('database.default') . '.database');
+        $sql = "SELECT table_schema || '.' || table_name AS table FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog', 'information_schema') ORDER BY table_schema, table_name";
+        $tables = DB::select($sql);
+        $this->info('');
+        $this->info('Listing all tables in '.$dbname);
+        $this->info('');
+        foreach ($tables AS $t) {
+            $this->info($t->table);
+        }
+        $this->info('');
         return Command::SUCCESS;
     }
 }
