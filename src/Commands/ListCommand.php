@@ -14,17 +14,8 @@ class ListCommand extends Command {
 
     public function handle() {
 
-        $tables = DB::selectAll(
-            'SELECT schema, table FROM information_schema.tables',
-            ['schema' => $schema, 'table' => $table]
-        );
-        if (!$exists) {
-            $this->error("Table '$schema.$table' does not exist.");
-            return Command::FAILURE;
-        }
-
+        $tables = DB::selectAll('SELECT schema, table FROM information_schema.tables');
         print_r($tables);
-
         return Command::SUCCESS;
     }
 }
