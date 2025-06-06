@@ -45,7 +45,7 @@ class BakeCommand extends Command {
         $modelName = $name;
         $replacements = [
             '{{ modelSingular }}' => $modelName,                                // e.g., 'Post'
-            '{{ modelClass }}' => $modelName,                                // e.g., 'Post'
+            '{{ modelClass }}' => $name,                                // e.g., 'Post'
             '{{ modelPlural }}' => Str::plural($modelName),                    // 'Posts'
             '{{ modelVariable }}' => Str::camel($modelName),                   // 'post'
             '{{ modelVariablePlural }}' => Str::camel(Str::plural($modelName)),// 'posts'
