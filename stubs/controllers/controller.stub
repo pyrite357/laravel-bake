@@ -41,10 +41,9 @@ class {{ controllerClass }} extends Controller {
         return redirect()->route('{{ routePrefix }}.index');
     }
 
-    public function show($id): View
+    public function show({{ modelClass }} ${{ modelVariable }})
     {
-        ${{ modelVariable }} = {{ modelClass }}::find($id);
-        return view('{{ viewFolder }}.show', compact('{{ modelNameLowerCase }}'));
+        return view('{{ viewFolder }}.show', compact('{{ modelVariable }}'));
     }
 }
 
