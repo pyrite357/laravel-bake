@@ -43,8 +43,8 @@ class {{ controllerClass }} extends Controller {
 
     public function show($id): View
     {
-        ${{modelNameLowerCase}} = {{modelName}}::find($id);
-        return view('{{modelView}}.show', compact('{{modelNameLowerCase}}'));
+        ${{ modelVariable }} = {{ modelClass }}::find($id);
+        return view('{{ viewFolder }}.show', compact('{{ modelNameLowerCase }}'));
     }
 }
 
