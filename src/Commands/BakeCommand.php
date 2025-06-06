@@ -42,10 +42,10 @@ class BakeCommand extends Command {
 
         // Table name in various forms
         $name = Str::studly($table); // PascalCase for class names
-        $modelName = $name;
+        $modelName = Str::singular($name);
         $replacements = [
             '{{ modelSingular }}' => $modelName,                                // e.g., 'Post'
-            '{{ modelClass }}' => $name,                                // e.g., 'Post'
+            '{{ modelClass }}' => $modelName,                                // e.g., 'Post'
             '{{ modelPlural }}' => Str::plural($modelName),                    // 'Posts'
             '{{ modelVariable }}' => Str::camel($modelName),                   // 'post'
             '{{ modelVariablePlural }}' => Str::camel(Str::plural($modelName)),// 'posts'
@@ -56,7 +56,11 @@ class BakeCommand extends Command {
             '{{ routePrefix }}' => Str::snake(Str::plural($modelName)),          // 'posts'
             '{{ viewFolder }}' => Str::snake(Str::plural($modelName)),         // 'posts'
             '{{ title }}' => Str::headline(Str::plural($modelName)),           // 'Posts'
-            '{{ controllerClass }}' => $modelName.'Controller',                // 'PostsController'
+            '{{ controllerClass }}' => Str::singular($modelName).'Controller',                // 'PostsController'
+            '{{ softDeletes }}' => '',
+            '{{ fillable }}' => '',
+            '{{ relations }}' => '',
+
         ];
         $tableName = Str::snake($table); // snake_case for URLs
         $this->info("Generating CRUD for: $name");
@@ -101,13 +105,13 @@ class BakeCommand extends Command {
         // 2. Create Controller
         $stub_controller = file_get_contents(base_path('vendor/pyrite357/laravel-bake/stubs/controllers/controller.stub'));
         $code_controller = $this->renderStub(base_path('vendor/pyrite357/laravel-bake/stubs/controllers/controller.stub'), $replacements);
-        $target_controller = app_path('Http/Controllers/'.$name.'Controller.php');
+        $target_controller = app_path('Http/Controllers/'.$model.'Controller.php');
         file_put_contents($target_controller, $code_controller);
         $this->info("Controller created: $target_controller");
 
         // 3. Append route to routes/web.php
         $route = "\n// [Auto-Generated CRUD for $name]\n";
-        $route .= "Route::resource('$table', App\\Http\\Controllers\\{$name}Controller::class);\n";
+        $route .= "Route::resource('$table', App\\Http\\Controllers\\{$model}Controller::class);\n";
         file_put_contents(base_path('routes/web.php'), $route, FILE_APPEND);
 
 
@@ -123,36 +127,11 @@ class BakeCommand extends Command {
             file_put_contents("{$viewPath}{$view}.blade.php", $viewContent);
             $this->info("View created: resources/views/{$tableName}/{$view}.blade.php");
         }
-        //$formView = $this->renderStub($stubPath.'form.stub', $replacements);
-        //file_put_contents($viewPath.'form.blade.php', $formView);
-        //$this->info("View created: resources/views/{$tableName}/form.blade.php");
 
-        // Define Routes
-        /*
-        $route_top = "use App\Http\Controllers\\" . "{$name}Controller;";
-        $route_bot = "Route::resource('$tableName', {$name}Controller::class);";
-        $this->info("Add the following 2 lines to routes/web.php");
-        $this->info('');
-        $this->info($route_top);
-        $this->info($route_bot);
-        $this->info('');
-        */
-
-        /*
-        $routeDefinition = <<<EOT
-Route::get('/$tableName', [\App\Http\Controllers\\{$name}Controller::class, 'index'])->name('$tableName.index');
-EOT;
-
-        file_put_contents(base_path('routes/web.php'), PHP_EOL . $routeDefinition, FILE_APPEND);
-        $this->info("Routes added to routes/web.php");
-        */
-        $this->info("\n\n");
-        $this->info("CRUD for scaffolding for $input complete!");
-        $this->info("\n\n");
+        // All done
+        $this->info("\nCRUD for scaffolding for $input complete!\n");
         $url = route(Str::snake(Str::plural($modelName)).'.index');  // Works if APP_URL is set
-
         $this->info("You may open ${url} in your browser now!");
-
         return Command::SUCCESS;
     }
 }
