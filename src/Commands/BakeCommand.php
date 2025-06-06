@@ -5,7 +5,7 @@ namespace Pyrite357\LaravelBake\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\File;
 
 class BakeCommand extends Command {
 
@@ -73,12 +73,28 @@ class BakeCommand extends Command {
         }
 
         // 1. Create Model with migration and factory
-        $this->call('make:model', [
-            'name' => $name,
-            '--migration' => false,
-            '--factory' => false,
-        ]);
-        $this->info("\nModel created: app/Models/$name.php\n");
+        $model = Str::singular($modelName);
+        $modelPath = app_path("Models/" . $model . ".php");
+        $modelExists = File::exists($modelPath);
+        $domodel = true;
+        if ($modelExists) {
+            if (! $this->confirm("File '{$modelPath}' exists. Overwrite? (Backup will be created if yes)", false)) {
+                // Selected no
+                $domodel = false;
+                $this->info("Skipping ".$modelPath);
+                return;
+            }
+        }
+        if ($domodel) {
+            if ($modelExists) {
+                // Create a backup before overwriting
+                $backupPath = $modelPath . '.' . now()->format('Ymd_His') . '.bak';
+                File::copy($modelPath, $backupPath);
+                $this->info("Backup created: {$backupPath}");
+            }
+            $this->call('make:model', ['name'=>$model, '--migration'=>false, '--factory'=>false]);
+            $this->info("\nModel created: $modelPath\n");
+        }
 
         // 2. Create Controller
         $stub_controller = file_get_contents(base_path('vendor/pyrite357/laravel-bake/stubs/controllers/controller.stub'));
@@ -130,6 +146,11 @@ EOT;
         */
         $this->info("\n\n");
         $this->info("CRUD for scaffolding for $input complete!");
+        $this->info("\n\n");
+        $url = route(Str::snake(Str::plural($modelName)).'.index');  // Works if APP_URL is set
+
+        $this->info("You may open ${url} in your browser now!");
+
         return Command::SUCCESS;
     }
 }
