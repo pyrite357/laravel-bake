@@ -49,6 +49,8 @@ class BakeCommand extends Command {
             '{{ modelPlural }}' => Str::plural($modelName),                    // 'Posts'
             '{{ modelVariable }}' => Str::camel($modelName),                   // 'post'
             '{{ modelVariablePlural }}' => Str::camel(Str::plural($modelName)),// 'posts'
+            '{{ modelName }}' => $name,
+            '{{ modelNameLowerCase }}' => strtolower(Str::singular($modelName)),
             '{{ table }}' => Str::snake(Str::plural($modelName)),              // 'posts'
             '{{ routeName }}' => Str::snake(Str::plural($modelName)),          // 'posts'
             '{{ routePrefix }}' => Str::snake(Str::plural($modelName)),          // 'posts'
