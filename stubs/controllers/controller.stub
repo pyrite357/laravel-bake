@@ -24,9 +24,9 @@ class {{ controllerClass }} extends Controller {
         return redirect()->route('{{ routePrefix }}.index');
     }
 
-    public function edit({{ modelClass }} ${{ modelVariable }})
+    public function edit({{ modelClass }} $item)
     {
-        return view('{{ viewFolder }}.edit', compact('{{ modelVariable }}'));
+        return view('{{ viewFolder }}.edit', compact('item'));
     }
 
     public function update(Request $request, {{ modelClass }} ${{ modelVariable }})
@@ -41,9 +41,9 @@ class {{ controllerClass }} extends Controller {
         return redirect()->route('{{ routePrefix }}.index');
     }
 
-    public function show({{ modelClass }} ${{ modelVariable }})
+    public function show({{ modelClass }} $item)
     {
-        return view('{{ viewFolder }}.show', compact('{{ modelVariable }}'));
+        return view('{{ viewFolder }}.show', compact('item'));
     }
 }
 
