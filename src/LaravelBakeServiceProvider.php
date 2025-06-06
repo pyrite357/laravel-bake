@@ -8,10 +8,12 @@ class LaravelBakeServiceProvider extends ServiceProvider {
 
     public function register() {
         // Register commands
-        $this->commands([
-            \Pyrite357\LaravelBake\Commands\BakeCommand::class,
-            \Pyrite357\LaravelBake\Commands\ListCommand::class,
-        ]);
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Pyrite357\LaravelBake\Commands\BakeCommand::class,
+                \Pyrite357\LaravelBake\Commands\ListCommand::class
+            ]);
+        }
     }
 
 }

@@ -82,18 +82,18 @@ class BakeCommand extends Command {
                 // Selected no
                 $domodel = false;
                 $this->info("Skipping ".$modelPath);
-                return;
-            }
-        }
-        if ($domodel) {
-            if ($modelExists) {
+            } else {
                 // Create a backup before overwriting
                 $backupPath = $modelPath . '.' . now()->format('Ymd_His') . '.bak';
                 File::copy($modelPath, $backupPath);
                 $this->info("Backup created: {$backupPath}");
             }
-            $this->call('make:model', ['name'=>$model, '--migration'=>false, '--factory'=>false]);
-            $this->info("\nModel created: $modelPath\n");
+        }
+        if ($domodel) {
+            $stub_model = file_get_contents(base_path('vendor/pyrite357/laravel-bake/stubs/models/model.stub'));
+            $code_model = $this->renderStub(base_path('vendor/pyrite357/laravel-bake/stubs/models/model.stub'), $replacements);
+            file_put_contents($modelPath, $code_model);
+            $this->info("Model created: $modelPath");
         }
 
         // 2. Create Controller

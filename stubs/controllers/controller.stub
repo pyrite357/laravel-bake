@@ -40,5 +40,11 @@ class {{ controllerClass }} extends Controller {
         ${{ modelVariable }}->delete();
         return redirect()->route('{{ routePrefix }}.index');
     }
+
+    public function show($id): View
+    {
+        ${{modelNameLowerCase}} = {{modelName}}::find($id);
+        return view('{{modelView}}.show', compact('{{modelNameLowerCase}}'));
+    }
 }
 
