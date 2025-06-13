@@ -39,7 +39,7 @@ Modify your `composer.json` to include the following:
 Run the following Composer command to install Laravel-Bake:
 
 ```bash
-composer require brandontanner/laravel-bake
+composer require pyrite357/laravel-bake
 ```
 
 ### Step 3: Register the Service Provider
@@ -90,8 +90,8 @@ php artisan cake:bake erp_system.sales_orders
 ## Supported Front-End Frameworks
 
 - **Bootstrap 5** (current)
-- **Tailwind CSS** (planned)
 - **ExtJS 4.2.2** (planned)
+- **Tailwind CSS** (planned)
 - **CakePHP 2.x default baked views theme** (planned)
 
 ## License
