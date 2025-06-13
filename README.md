@@ -1,10 +1,17 @@
 # Laravel-Bake
 
+## 🛠️ **Project Status: In Development**
+
+### ⚠️ **This project is currently under active development and is not yet ready for production use.**
+Features may be incomplete or unstable. Contributions and feedback are welcome!
+
+## Project Description
+
 **Laravel-Bake** is a powerful Laravel plugin designed to streamline database schema-based code generation, inspired by CakePHP 2.0's `bake` CLI tool. It allows developers to quickly scaffold models, controllers, and CRUD pages directly from database tables using a simple Artisan command. This project is proudly sponsored by [Radeus Labs](https://radeuslabs.com), a company dedicated to supporting the open-source community.
 
 ## About Radeus Labs
 
-![Radeus Labs Logo](https://radeuslabs.com/wp-content/uploads/2025/01/logo-radeus-labs-1.jpg)
+![Radeus Labs Logo](https://radeuslabs.com/wp-content/uploads/2025/01/logo-radeus-labs-footer-New.png)
 
 [Radeus Labs](https://radeuslabs.com) is a leader in providing high-quality **SATCOM systems** and **rack-mount servers** tailored for military applications. Their cutting-edge solutions ensure reliable communication and robust computing power in the most demanding environments. Radeus Labs is committed to fostering innovation and giving back to the open-source community, which is why they sponsored the development of Laravel-Bake by Brandon Tanner.
 
@@ -29,7 +36,7 @@ Modify your `composer.json` to include the following:
 "repositories": [
     {
         "type": "vcs",
-        "url": "https://github.com/your-username/laravel-bake.git"
+        "url": "https://github.com/pyrite357/laravel-bake.git"
     }
 ]
 ```
@@ -39,7 +46,7 @@ Modify your `composer.json` to include the following:
 Run the following Composer command to install Laravel-Bake:
 
 ```bash
-composer require brandontanner/laravel-bake
+composer require pyrite357/laravel-bake
 ```
 
 ### Step 3: Register the Service Provider
@@ -49,7 +56,7 @@ Add the service provider to the `providers` array in `config/app.php`:
 ```php
 'providers' => [
     // Other providers...
-    BrandonTanner\LaravelBake\LaravelBakeServiceProvider::class,
+    Pyrite357\LaravelBake\LaravelBakeServiceProvider::class,
 ]
 ```
 
@@ -90,8 +97,8 @@ php artisan cake:bake erp_system.sales_orders
 ## Supported Front-End Frameworks
 
 - **Bootstrap 5** (current)
-- **Tailwind CSS** (planned)
 - **ExtJS 4.2.2** (planned)
+- **Tailwind CSS** (planned)
 - **CakePHP 2.x default baked views theme** (planned)
 
 ## License
