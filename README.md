@@ -4,7 +4,7 @@
 
 ## About Radeus Labs
 
-![Radeus Labs Logo](https://radeuslabs.com/wp-content/uploads/2025/01/logo-radeus-labs-1.jpg)
+![Radeus Labs Logo](https://radeuslabs.com/wp-content/uploads/2025/01/logo-radeus-labs-footer-New.png)
 
 [Radeus Labs](https://radeuslabs.com) is a leader in providing high-quality **SATCOM systems** and **rack-mount servers** tailored for military applications. Their cutting-edge solutions ensure reliable communication and robust computing power in the most demanding environments. Radeus Labs is committed to fostering innovation and giving back to the open-source community, which is why they sponsored the development of Laravel-Bake by Brandon Tanner.
 
@@ -29,7 +29,7 @@ Modify your `composer.json` to include the following:
 "repositories": [
     {
         "type": "vcs",
-        "url": "https://github.com/your-username/laravel-bake.git"
+        "url": "https://github.com/pyrite357/laravel-bake.git"
     }
 ]
 ```
@@ -49,7 +49,7 @@ Add the service provider to the `providers` array in `config/app.php`:
 ```php
 'providers' => [
     // Other providers...
-    BrandonTanner\LaravelBake\LaravelBakeServiceProvider::class,
+    Pyrite357\LaravelBake\LaravelBakeServiceProvider::class,
 ]
 ```
 
