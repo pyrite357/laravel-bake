@@ -1,9 +1,11 @@
 # Laravel-Bake
 
-# ⚠️ **This project is currently under active development and is not yet ready for production use.**
+## 🛠️ **Project Status: In Development**
+
+### ⚠️ **This project is currently under active development and is not yet ready for production use.**
 Features may be incomplete or unstable. Contributions and feedback are welcome!
 
-
+## Project Description
 
 **Laravel-Bake** is a powerful Laravel plugin designed to streamline database schema-based code generation, inspired by CakePHP 2.0's `bake` CLI tool. It allows developers to quickly scaffold models, controllers, and CRUD pages directly from database tables using a simple Artisan command. This project is proudly sponsored by [Radeus Labs](https://radeuslabs.com), a company dedicated to supporting the open-source community.
 
