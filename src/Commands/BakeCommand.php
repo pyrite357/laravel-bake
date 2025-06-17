@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\File;
 
 class BakeCommand extends Command {
 
-    protected $signature = 'cake:bake {table_name}';
+    protected $signature = 'cake:bake 
+                            {table_name}
+                            {--overwrite: Overwrite existing files}';
     protected $description = 'Bake a new model (+CRUD pages) with Laravel-Bake by Pyrite357';
 
     protected function renderStub(string $stubPath, array $vars): string {
@@ -27,8 +29,6 @@ class BakeCommand extends Command {
             return Command::FAILURE;
         }
         [$schema, $table] = explode('.', strtolower($input), 2);
-        //$this->info($schema);
-        //$this->info($table);
 
         // Ensure table exists
         $exists = DB::selectOne(
@@ -64,6 +64,13 @@ class BakeCommand extends Command {
         ];
         $tableName = Str::snake($table); // snake_case for URLs
         $this->info("Generating CRUD for: $name");
+
+        if ($this->option('overwrite')) {
+            // --overwrite activated
+            //
+            // TODO: do stuff here
+            $this->info('overwrite mode activated for views');
+        }
 
         // Get column names and types
         $columns = DB::select(

@@ -1,4 +1,4 @@
-# Laravel-Bake
+# Laravel-Bakes
 
 ## 🛠️ **Project Status: In Development**
 
