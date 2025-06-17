@@ -11,7 +11,7 @@ class BakeCommand extends Command {
 
     protected $signature = 'cake:bake 
                             {table_name}
-                            {--overwrite: Overwrite existing files}';
+                            {--overwrite : Overwrite existing files}';
     protected $description = 'Bake a new model (+CRUD pages) with Laravel-Bake by Pyrite357';
 
     protected function renderStub(string $stubPath, array $vars): string {
@@ -56,6 +56,7 @@ class BakeCommand extends Command {
             '{{ routePrefix }}' => Str::snake(Str::plural($modelName)),          // 'posts'
             '{{ viewFolder }}' => Str::snake(Str::plural($modelName)),         // 'posts'
             '{{ title }}' => Str::headline(Str::plural($modelName)),           // 'Posts'
+            '{{ title2 }}' => Str::headline(Str::singular($modelName)),           // 'Posts'
             '{{ controllerClass }}' => Str::singular($modelName).'Controller',                // 'PostsController'
             '{{ softDeletes }}' => '',
             '{{ fillable }}' => '',
@@ -67,9 +68,9 @@ class BakeCommand extends Command {
 
         if ($this->option('overwrite')) {
             // --overwrite activated
+            $this->info('overwrite mode activated for views');
             //
             // TODO: do stuff here
-            $this->info('overwrite mode activated for views');
         }
 
         // Get column names and types
