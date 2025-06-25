@@ -10,10 +10,7 @@
         <table class="table table-bordered table-striped">
             <thead class="thead-dark">
                 <tr>
-                    <th><a href="{{ route('{{ viewFolder }}.index', ['sort' => 'id', 'direction' => $sort === 'id' && $direction === 'asc' ? 'desc' : 'asc']) }}">Id</a></th>
-                    <th><a href="{{ route('{{ viewFolder }}.index', ['sort' => 'name', 'direction' => $sort === 'name' && $direction === 'asc' ? 'desc' : 'asc']) }}">Name</a></th>
-                    <th><a href="{{ route('{{ viewFolder }}.index', ['sort' => 'updated_at', 'direction' => $sort === 'updated_at' && $direction === 'asc' ? 'desc' : 'asc']) }}">Last Updated</a></th>
-                    <th><a href="{{ route('{{ viewFolder }}.index', ['sort' => 'updated_by', 'direction' => $sort === 'updated_by' && $direction === 'asc' ? 'desc' : 'asc']) }}">Updated By</a></th>
+{{ table_headers }}
                     <th>Actions</th>
                 </tr>
             </thead>

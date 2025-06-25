@@ -11,7 +11,7 @@ class BakeCommand extends Command {
 
     protected $signature = 'cake:bake 
                             {table_name}
-                            {--overwrite : Overwrite existing files}';
+                            {--overwrite : Overwrite existing files w/o prompting}';
     protected $description = 'Bake a new model (+CRUD pages) with Laravel-Bake by Pyrite357';
 
     protected function renderStub(string $stubPath, array $vars): string {
@@ -40,6 +40,29 @@ class BakeCommand extends Command {
             return Command::FAILURE;
         }
 
+        // Get column names and types
+        $columns = DB::select(
+            'SELECT column_name, data_type
+             FROM information_schema.columns
+             WHERE table_schema = :schema AND table_name = :table
+             ORDER BY ordinal_position',
+            ['schema' => $schema, 'table' => $table]
+        );
+
+        // Table headers for views
+        $table_headers = '';
+        $fillable = [];
+        foreach ($columns AS $c) {
+            $col = $c->column_name;
+            if (!in_array($col, ['id','created_at','updated_at'])) {
+                $fillable[] = "'$col'";
+            }
+            $foo = Str::snake(Str::plural($table));
+            $table_headers .= "\t\t\t\t\t<th><a href=\"{{ route('$foo.index', ['sort' => '$col', 'direction' => \$sort === '$col' && \$direction === 'asc' ? 'desc' : 'asc']) }}\">$col</a></th>\n";
+        }
+        $fillable = implode(',', $fillable);
+
+
         // Table name in various forms
         $name = Str::studly($table); // PascalCase for class names
         $modelName = Str::singular($name);
@@ -59,8 +82,9 @@ class BakeCommand extends Command {
             '{{ title2 }}' => Str::headline(Str::singular($modelName)),           // 'Posts'
             '{{ controllerClass }}' => Str::singular($modelName).'Controller',                // 'PostsController'
             '{{ softDeletes }}' => '',
-            '{{ fillable }}' => '',
+            '{{ fillable }}' => $fillable,
             '{{ relations }}' => '',
+            '{{ table_headers }}' => $table_headers
 
         ];
         $tableName = Str::snake($table); // snake_case for URLs
@@ -73,14 +97,6 @@ class BakeCommand extends Command {
             // TODO: do stuff here
         }
 
-        // Get column names and types
-        $columns = DB::select(
-            'SELECT column_name, data_type
-             FROM information_schema.columns
-             WHERE table_schema = :schema AND table_name = :table
-             ORDER BY ordinal_position',
-            ['schema' => $schema, 'table' => $table]
-        );
         $this->info("Columns in $schema.$table:");
         foreach ($columns as $col) {
             $this->line(" - {$col->column_name} ({$col->data_type})");
@@ -118,8 +134,7 @@ class BakeCommand extends Command {
         $this->info("Controller created: $target_controller");
 
         // 3. Append route to routes/web.php
-        $route = "\n// [Auto-Generated CRUD for $name]\n";
-        $route .= "Route::resource('$table', App\\Http\\Controllers\\{$model}Controller::class);\n";
+        $route = "Route::resource('$table', App\\Http\\Controllers\\{$model}Controller::class); // [Auto-Generated CRUD for $name]\n";
         file_put_contents(base_path('routes/web.php'), $route, FILE_APPEND);
 
 
