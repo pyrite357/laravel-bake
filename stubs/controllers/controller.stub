@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{{ modelClass }};
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Models\{{ modelClass }};
 
 class {{ controllerClass }} extends Controller {
 
     public function index(Request $request) {
-        $sort = $request->get('sort', 'id');
+        $sort = $request->get('sort', '{{ defaultSortColumn }}');
         $direction = $request->get('direction', 'desc');
         $items = {{ modelClass }}::orderBy($sort, $direction)->paginate(20);
         return view('{{ viewFolder }}.index', compact('items', 'sort', 'direction'));

@@ -19,23 +19,31 @@ class BakeCommand extends Command {
         return str_replace(array_keys($vars), array_values($vars), $content);
     }
 
+    public function does_table_exist($schema, $table) {
+        $exists = DB::selectOne(
+            'SELECT 1 FROM information_schema.tables WHERE table_schema = :schema AND table_name = :table',
+            ['schema' => $schema, 'table' => $table]
+        );
+        return $exists;
+    }
 
     public function handle() {
 
         // Ensure first argument is schema_name.table_name
         $input = $this->argument('table_name'); // e.g. 'myschema.mytable'
         if (!str_contains($input, '.')) {
-            $this->error("Invalid format. Expected 'schema.table'. For example: public.users or closeio.contacts");
-            return Command::FAILURE;
+            // If no dot, check if table in public schema, else tell them to provide it
+            if (!$this->does_table_exist('public', $input)) {
+                $this->error("Invalid format. Expected 'schema.table'. For example: public.users or closeio.contacts");
+                return Command::FAILURE;
+            } else {
+                $input = 'public.'.$input;
+            }
         }
         [$schema, $table] = explode('.', strtolower($input), 2);
 
         // Ensure table exists
-        $exists = DB::selectOne(
-            'SELECT 1 FROM information_schema.tables WHERE table_schema = :schema AND table_name = :table',
-            ['schema' => $schema, 'table' => $table]
-        );
-        if (!$exists) {
+        if (!$this->does_table_exist($schema, $table)) {
             $this->error("Table '$schema.$table' does not exist.");
             return Command::FAILURE;
         }
@@ -54,7 +62,7 @@ class BakeCommand extends Command {
         $fillable = [];
         foreach ($columns AS $c) {
             $col = $c->column_name;
-            if (!in_array($col, ['id','created_at','updated_at'])) {
+            if (!in_array($col, ['id','created_at','updated_at','created_by','updated_by','created','modified','user_created','user_modified'])) {
                 $fillable[] = "'$col'";
             }
             $foo = Str::snake(Str::plural($table));
@@ -84,7 +92,8 @@ class BakeCommand extends Command {
             '{{ softDeletes }}' => '',
             '{{ fillable }}' => $fillable,
             '{{ relations }}' => '',
-            '{{ table_headers }}' => $table_headers
+            '{{ table_headers }}' => $table_headers,
+            '{{ defaultSortColumn }}' => 'id' // TODO: use primary key if exists or first column
 
         ];
         $tableName = Str::snake($table); // snake_case for URLs
@@ -153,7 +162,7 @@ class BakeCommand extends Command {
 
         // All done
         $this->info("\nCRUD for scaffolding for $input complete!\n");
-        $url = route(Str::snake(Str::plural($modelName)).'.index');  // Works if APP_URL is set
+        $url = route(Str::snake(Str::plural($modelName)).'.index');  // Works if APP_URL is set and config:cache is too
         $this->info("You may open ${url} in your browser now!");
         return Command::SUCCESS;
     }
