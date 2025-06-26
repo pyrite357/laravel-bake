@@ -17,19 +17,7 @@
             <tbody>
                 @foreach ($items as $item)
                     <tr>
-                        <td>{{ $item->id }}</td>
-                        <td>{{ $item->name }}</td>
-                        <td>{{ \Carbon\Carbon::parse($item->updated_at)->format('n/j/y, g:i A') }}</td>
-                        <td>{{ $item->updatedBy->name ?? 'Unknown' }}</td>
-                        <td>
-                            <a href="{{ route('{{ viewFolder }}.show', $item) }}" class="btn btn-sm btn-info">View</a>
-                            <a href="{{ route('{{ viewFolder }}.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
-                            <form action="{{ route('{{ viewFolder }}.destroy', $item) }}" method="POST" style="display:inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                            </form>
-                        </td>
+{{ table_rows }}
                     </tr>
                 @endforeach
             </tbody>

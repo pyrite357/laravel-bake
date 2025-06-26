@@ -27,6 +27,23 @@ class BakeCommand extends Command {
         return $exists;
     }
 
+    public function backup_existing_file($file_path) {
+        $backup_path = $file_path . '.' . now()->format('Ymd_His') . '.backup.php';
+        File::copy($file_path, $backup_path);
+        $this->info("Backup created: {$backup_path}");
+    }
+
+    public function stringInFile($filePath, $searchString) {
+        if (!file_exists($filePath) || !is_readable($filePath)) {
+            return false;
+        }
+        $contents = file_get_contents($filePath);
+        if ($contents === false) {
+            return false;
+        }
+        return strpos($contents, $searchString) !== false;
+    }
+
     public function handle() {
 
         // Ensure first argument is schema_name.table_name
@@ -59,17 +76,37 @@ class BakeCommand extends Command {
 
         // Table headers for views
         $table_headers = '';
+        $table_rows = '';
         $fillable = [];
+        $route_resource = Str::snake(Str::plural($table));
         foreach ($columns AS $c) {
             $col = $c->column_name;
             if (!in_array($col, ['id','created_at','updated_at','created_by','updated_by','created','modified','user_created','user_modified'])) {
                 $fillable[] = "'$col'";
             }
-            $foo = Str::snake(Str::plural($table));
-            $table_headers .= "\t\t\t\t\t<th><a href=\"{{ route('$foo.index', ['sort' => '$col', 'direction' => \$sort === '$col' && \$direction === 'asc' ? 'desc' : 'asc']) }}\">$col</a></th>\n";
+            $table_headers .= "\t\t\t\t\t<th><a href=\"{{ route('$route_resource.index', ['sort' => '$col', 'direction' => \$sort === '$col' && \$direction === 'asc' ? 'desc' : 'asc']) }}\">".ucfirst($col)."</a></th>\n";
+            $table_rows .= "\t\t\t\t\t\t<td>{{ ";
+            if (substr($c->data_type,0,4) == 'time') {
+                $table_rows .= "\\Carbon\\Carbon::parse(\$item->$col)->format('n/j/y, g:i A')";
+            } else if ($c->data_type == 'date') {
+                $table_rows .= "\\Carbon\\Carbon::parse(\$item->$col)->format('n/j/y')";
+            } else {
+                $table_rows .= "\$item->$col";
+            }
+            $table_rows .= " }}</td>\n";
         }
         $fillable = implode(',', $fillable);
-
+        $table_rows .= <<<EOT
+                        <td>
+                            <a href="{{ route('{$route_resource}.show', \$item) }}" class="btn btn-sm btn-info">View</a>
+                            <a href="{{ route('{$route_resource}.edit', \$item) }}" class="btn btn-sm btn-warning">Edit</a>
+                            <form action="{{ route('{$route_resource}.destroy', \$item) }}" method="POST" style="display:inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                            </form>
+                        </td>
+EOT;
 
         // Table name in various forms
         $name = Str::studly($table); // PascalCase for class names
@@ -87,12 +124,13 @@ class BakeCommand extends Command {
             '{{ routePrefix }}' => Str::snake(Str::plural($modelName)),          // 'posts'
             '{{ viewFolder }}' => Str::snake(Str::plural($modelName)),         // 'posts'
             '{{ title }}' => Str::headline(Str::plural($modelName)),           // 'Posts'
-            '{{ title2 }}' => Str::headline(Str::singular($modelName)),           // 'Posts'
+            '{{ title2 }}' => Str::headline(Str::singular($modelName)),           // 'Engineering Bom'
             '{{ controllerClass }}' => Str::singular($modelName).'Controller',                // 'PostsController'
             '{{ softDeletes }}' => '',
             '{{ fillable }}' => $fillable,
             '{{ relations }}' => '',
             '{{ table_headers }}' => $table_headers,
+            '{{ table_rows }}' => $table_rows,
             '{{ defaultSortColumn }}' => 'id' // TODO: use primary key if exists or first column
 
         ];
@@ -117,15 +155,19 @@ class BakeCommand extends Command {
         $modelExists = File::exists($modelPath);
         $domodel = true;
         if ($modelExists) {
-            if (! $this->confirm("File '{$modelPath}' exists. Overwrite? (Backup will be created if yes)", false)) {
-                // Selected no
-                $domodel = false;
-                $this->info("Skipping ".$modelPath);
+            if (! $this->option('overwrite')) {
+                if (! $this->confirm("File '{$modelPath}' exists. Overwrite? (Backup will be created if yes)", false)) {
+                    // Selected no
+                    $domodel = false;
+                    $this->info("Skipping ".$modelPath);
+                } else {
+                    // Create a backup before overwriting
+                    $this->backup_existing_file($modelPath);
+                }
             } else {
+                // --overwrite (without prompting) was selected
                 // Create a backup before overwriting
-                $backupPath = $modelPath . '.' . now()->format('Ymd_His') . '.bak';
-                File::copy($modelPath, $backupPath);
-                $this->info("Backup created: {$backupPath}");
+                $this->backup_existing_file($modelPath);
             }
         }
         if ($domodel) {
@@ -143,8 +185,11 @@ class BakeCommand extends Command {
         $this->info("Controller created: $target_controller");
 
         // 3. Append route to routes/web.php
-        $route = "Route::resource('$table', App\\Http\\Controllers\\{$model}Controller::class); // [Auto-Generated CRUD for $name]\n";
-        file_put_contents(base_path('routes/web.php'), $route, FILE_APPEND);
+        if (!$this->stringInFile(base_path('routes/web.php'), "Route::resource('$table'")) {
+            $route = "Route::resource('$table', App\\Http\\Controllers\\{$model}Controller::class); // [Auto-Generated CRUD for $name]\n";
+            file_put_contents(base_path('routes/web.php'), $route, FILE_APPEND);
+            $this->info("Resource route created in routes/web.php for $table");
+        }
 
 
         // 4. Generate Views
