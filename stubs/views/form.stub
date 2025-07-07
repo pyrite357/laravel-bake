@@ -1,13 +1,8 @@
-<form method="POST" action="{{ isset($post) ? route('posts.update', $post) : route('posts.store') }}">
+<form method="POST" action="{{ $action ?? '' }}">
     @csrf
-    @if(isset($post)) @method('PUT') @endif
+    @method($method ?? 'POST')
 
-    {{ formFields }}
+    {{ form_fields }}
 
-<div class="mb-3">
-    <label for="name" class="form-label">Name</label>
-    <input type="text" name="name" id="name" value="{{ old('name', $cannedReport->name ?? '') }}" class="form-control">
-</div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">{{ $buttonText ?? 'Save' }}</button>
 </form>

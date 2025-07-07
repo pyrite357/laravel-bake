@@ -27,6 +27,172 @@ class BakeCommand extends Command {
         return $exists;
     }
 
+    protected function required($nullable): string {
+        return $nullable ? '' : 'required';
+    }
+
+    protected function generateFormFields(array $columns, string $style = 'bootstrap'): string {
+        $output = '';
+
+        foreach ($columns as $col) {
+            $name = $col->column_name; //$col['name'];
+            $type = $col->data_type; //$col['type'];
+            $nullable = false; //$col['nullable'] ?? false;
+            $default = null; //$col['default'] ?? null;
+
+            if (in_array($name, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                continue;
+            }
+
+            $label = ucwords(str_replace('_', ' ', $name));
+            $required = $nullable ? '' : 'required';
+            $valueExpr = "{{ old('{$name}', \$model->{$name} ?? '{$default}') }}";
+
+            $class = match ($style) {
+                'tailwind' => 'class="border rounded p-2 w-full"',
+                'extjs' => '', // handled separately if needed
+                default => 'class="form-control"'
+            };
+
+            if ($type === 'boolean') {
+                $field = <<<BLADE
+
+        <div class="form-check mb-3">
+            <input type="hidden" name="{$name}" value="0">
+            <input type="checkbox" name="{$name}" id="{$name}" class="form-check-input"
+                   value="1" {{ old('{$name}', \$model->{$name} ?? $default) ? 'checked' : '' }}>
+            <label for="{$name}" class="form-check-label">{$label}</label>
+            @error('{$name}')<div class="text-danger">{{ \$message }}</div>@enderror
+        </div>
+    BLADE;
+            } elseif ($type === 'text') {
+                $field = <<<BLADE
+
+        <div class="mb-3">
+            <label for="{$name}" class="form-label">{$label}</label>
+            <textarea name="{$name}" id="{$name}" {$class} {$required}>{$valueExpr}</textarea>
+            @error('{$name}')<div class="text-danger">{{ \$message }}</div>@enderror
+        </div>
+    BLADE;
+            } else {
+                $inputType = match ($type) {
+                    'date' => 'date',
+                    'datetime', 'timestamp' => 'datetime-local',
+                    'integer', 'bigint', 'float', 'decimal' => 'number',
+                    default => Str::contains($name, 'email') ? 'email' : 'text',
+                };
+
+                $field = <<<BLADE
+
+        <div class="mb-3">
+            <label for="{$name}" class="form-label">{$label}</label>
+            <input type="{$inputType}" name="{$name}" id="{$name}" value="{$valueExpr}" {$class} {$required}>
+            @error('{$name}')<div class="text-danger">{{ \$message }}</div>@enderror
+        </div>
+    BLADE;
+            }
+
+            $output .= $field;
+        }
+
+        return $output;
+    }
+
+
+    protected function generateFormBlade(array $columns): string {
+        $form = <<<'BLADE'
+    <form method="POST" action="{{ $action ?? '' }}">
+        @csrf
+        @method($method ?? 'POST')
+    BLADE;
+
+        foreach ($columns as $col) {
+            $name = $col['name'];
+            $type = $col['type'];
+            $nullable = $col['nullable'] ?? false;
+            $default = $col['default'] ?? null;
+
+            if (in_array($name, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                continue;
+            }
+
+            $label = ucwords(str_replace('_', ' ', $name));
+            $field = '';
+            $inputType = 'text';
+
+            switch ($type) {
+                case 'text':
+                    $inputType = 'textarea';
+                    break;
+                case 'boolean':
+                    $inputType = 'checkbox';
+                    break;
+                case 'date':
+                    $inputType = 'date';
+                    break;
+                case 'timestamp':
+                case 'datetime':
+                    $inputType = 'datetime-local';
+                    break;
+                case 'integer':
+                case 'bigint':
+                case 'float':
+                case 'decimal':
+                    $inputType = 'number';
+                    break;
+                case 'string':
+                    $inputType = Str::contains($name, 'email') ? 'email' : 'text';
+                    break;
+            }
+
+            // Build the form field
+            if ($inputType === 'textarea') {
+                $field = <<<BLADE
+
+        <div class="mb-3">
+            <label for="{$name}" class="form-label">{$label}</label>
+            <textarea name="{$name}" id="{$name}" class="form-control" {$this->required($nullable)}>{{ old('{$name}', \$model->{$name} ?? '{$default}') }}</textarea>
+            @error('{$name}')<div class="text-danger">{{ \$message }}</div>@enderror
+        </div>
+    BLADE;
+            } elseif ($inputType === 'checkbox') {
+                $field = <<<BLADE
+
+        <div class="form-check mb-3">
+            <input type="hidden" name="{$name}" value="0">
+            <input type="checkbox" name="{$name}" id="{$name}" class="form-check-input"
+                value="1" {{ old('{$name}', \$model->{$name} ?? {$default}) ? 'checked' : '' }}>
+            <label for="{$name}" class="form-check-label">{$label}</label>
+            @error('{$name}')<div class="text-danger">{{ \$message }}</div>@enderror
+        </div>
+    BLADE;
+            } else {
+                $field = <<<BLADE
+
+        <div class="mb-3">
+            <label for="{$name}" class="form-label">{$label}</label>
+            <input type="{$inputType}" name="{$name}" id="{$name}" class="form-control"
+                value="{{ old('{$name}', \$model->{$name} ?? '{$default}') }}" {$this->required($nullable)}>
+            @error('{$name}')<div class="text-danger">{{ \$message }}</div>@enderror
+        </div>
+    BLADE;
+            }
+
+            $form .= $field;
+        }
+
+        $form .= <<<BLADE
+
+
+        <button type="submit" class="btn btn-primary">{{ \$buttonText ?? 'Save' }}</button>
+    </form>
+
+    BLADE;
+
+        return $form;
+    }
+
+
     public function backup_existing_file($file_path) {
         $backup_path = $file_path . '.' . now()->format('Ymd_His') . '.backup.php';
         File::copy($file_path, $backup_path);
@@ -200,7 +366,13 @@ EOT;
         }
         $views = ['index','create','edit','show','form'];
         foreach ($views AS $view) {
-            $viewContent = $this->renderStub("{$stubPath}{$view}.stub", $replacements);
+            if ($view === 'form') {
+                $formFields = $this->generateFormFields($columns);
+                $viewContent = str_replace('{{ form_fields }}', $formFields, file_get_contents("{$stubPath}{$view}.stub"));
+            } else {
+                $viewContent = $this->renderStub("{$stubPath}{$view}.stub", $replacements);
+            }
+            //$viewContent = $this->renderStub("{$stubPath}{$view}.stub", $replacements);
             file_put_contents("{$viewPath}{$view}.blade.php", $viewContent);
             $this->info("View created: resources/views/{$tableName}/{$view}.blade.php");
         }

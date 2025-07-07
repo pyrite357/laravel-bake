@@ -1,17 +1,25 @@
-@extends('layouts.bootstrap-table')
+@extends('layouts.crud')
+
 @section('content')
-<div class="container mt-4">
-    <h2>Edit {{ modelName }}</h2>
-    <div class="card">
-        <div class="card-body">
-            <form method="POST" action="{{ route('{{ viewFolder }}.update', $item->id) }}">
-                @csrf
-                @method('PUT')
-                @include('{{ viewFolder }}.form')
-                <button type="submit" class="btn btn-primary mt-3">Update Report</button>
-            </form>
+<div class="container">
+    <h1>Edit {{ ucfirst(Str::singular('{{ table }}')) }}</h1>
+
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <strong>Whoops!</strong> There were some problems with your input.<br><br>
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
-    </div>
+    @endif
+
+    @include('{{ table }}.form', [
+        'action' => route('{{ table }}.update', $model->id),
+        'method' => 'PUT',
+        'buttonText' => 'Update',
+        'model' => $model
+    ])
 </div>
 @endsection
-
