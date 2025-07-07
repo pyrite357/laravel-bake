@@ -22,7 +22,7 @@ class {{ controllerClass }} extends Controller {
 
     public function store(Request $request)
     {
-        {{ modelClass }}::create($request->all());
+        {{ modelClass }}::create($request->only({{ fillable }}));
         return redirect()->route('{{ routePrefix }}.index');
     }
 
