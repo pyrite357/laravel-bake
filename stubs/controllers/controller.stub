@@ -12,7 +12,8 @@ class {{ controllerClass }} extends Controller {
     public function index(Request $request) {
         $sort = $request->get('sort', '{{ defaultSortColumn }}');
         $direction = $request->get('direction', 'desc');
-        $items = {{ modelClass }}::orderBy($sort, $direction)->paginate(20);
+        //$items = {{ modelClass }}::orderBy($sort, $direction)->paginate(20);
+        $items = {{ modelClass }}::with(['createdBy', 'updatedBy'])->orderBy($sort, $direction)->paginate(20);
         return view('{{ viewFolder }}.index', compact('items', 'sort', 'direction'));
     }
 
