@@ -162,10 +162,14 @@ class BakeCommand extends Command {
             }
             $table_headers .= "\t\t\t\t\t<th><a href=\"{{ route('$route_resource.index', ['sort' => '$col', 'direction' => \$sort === '$col' && \$direction === 'asc' ? 'desc' : 'asc']) }}\">".ucfirst($col)."</a></th>\n";
             $table_rows .= "\t\t\t\t\t\t<td>{{ ";
+
             if (substr($c->data_type,0,4) == 'time') {
                 $table_rows .= "\\Carbon\\Carbon::parse(\$item->$col)->format('n/j/y, g:i A')";
             } else if ($c->data_type == 'date') {
                 $table_rows .= "\\Carbon\\Carbon::parse(\$item->$col)->format('n/j/y')";
+            } else if ($col == 'created_by' || $col == 'updated_by') {
+                //$item->createdBy?->fullName ?? '—'
+                $table_rows .= "\$item->" . Str::camel($col) . "?->fullName ?? '-'";
             } else {
                 $table_rows .= "\$item->$col";
             }
@@ -247,8 +251,13 @@ EOT;
             }
         }
         if ($domodel) {
-            $stub_model = file_get_contents(base_path('vendor/pyrite357/laravel-bake/stubs/models/model.stub'));
-            $code_model = $this->renderStub(base_path('vendor/pyrite357/laravel-bake/stubs/models/model.stub'), $replacements);
+            if ($this->has_whodoneit_cols($columns)) {
+                $stubby = 'vendor/pyrite357/laravel-bake/stubs/models/model.whodoneit.stub';
+            } else {
+                $stubby = 'vendor/pyrite357/laravel-bake/stubs/models/model.stub';
+            }
+            $stub_model = file_get_contents(base_path($stubby));
+            $code_model = $this->renderStub(base_path($stubby), $replacements);
             file_put_contents($modelPath, $code_model);
             $this->info("Model created: $modelPath");
         }
