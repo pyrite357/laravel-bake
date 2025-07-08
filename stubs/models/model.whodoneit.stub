@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Traits\WhoDoneIt;
+
+class {{ modelClass }} extends Model {
+    use HasFactory, WhoDoneIt;
+
+    {{ softDeletes }}
+
+    protected $perPage = 20;
+
+    /** The attributes that are mass assignable. */
+    protected $fillable = [{{ fillable }}];
+
+    public function createdBy() {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy() {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+{{ relations }}
+
+}
