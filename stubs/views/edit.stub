@@ -16,10 +16,10 @@
     @endif
 
     @include('{{ table }}.form', [
-        'action' => route('{{ table }}.update', $model->id),
+        'action' => route('{{ table }}.update', ${{ modelVariable }}->id),
         'method' => 'PUT',
         'buttonText' => 'Update',
-        'model' => $model
+        'model' => ${{ modelVariable }}
     ])
 </div>
 @endsection

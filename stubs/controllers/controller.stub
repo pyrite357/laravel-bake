@@ -26,9 +26,9 @@ class {{ controllerClass }} extends Controller {
         return redirect()->route('{{ routePrefix }}.index');
     }
 
-    public function edit({{ modelClass }} $item)
+    public function edit({{ modelClass }} ${{ modelVariable }})
     {
-        return view('{{ viewFolder }}.edit', compact('item'));
+        return view('{{ viewFolder }}.edit', compact('{{ modelVariable }}'));
     }
 
     public function update(Request $request, {{ modelClass }} ${{ modelVariable }})
